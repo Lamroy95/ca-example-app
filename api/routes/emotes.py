@@ -5,6 +5,7 @@ from fastapi.params import Path
 
 from api.dependencies.reader import local_reader_provider, remote_reader_provider, memory_reader_provider
 from api.dependencies.task_manager import task_manager_provider
+from api.models.bodies import UrlEmoteBody
 from api.models.responses import TaskIdResponse, TaskResultResponse
 from emotes.interfaces.reader import EmoteReader
 from emotes.interfaces.task_manager import TaskManager
@@ -12,14 +13,14 @@ from emotes.services.convert import convert_webp_emote_from_path, convert_webp_e
 
 
 async def convert_webp_emote_url(
-        emote_url: str = Path(alias="emote_url"),
+        body: UrlEmoteBody,
         task_manager: TaskManager = Depends(task_manager_provider),
         reader: EmoteReader = Depends(remote_reader_provider)
 ) -> TaskIdResponse:
     """
     Convert WEBP emote from url
     """
-    task = convert_webp_emote_from_path(emote_url, reader, task_manager)
+    task = convert_webp_emote_from_path(body.emote_url, reader, task_manager)
     return TaskIdResponse(task_id=task.id)
 
 
@@ -53,5 +54,6 @@ async def check_task_result(
 
 
 def setup(router: APIRouter):
-    router.add_api_route("/emotes/convert/webp/{emote_url}", convert_webp_emote_url, methods=["POST"])
+    router.add_api_route("/emotes/convert/webp/url", convert_webp_emote_url, methods=["POST"])
+    router.add_api_route("/emotes/convert/webp/file", convert_webp_emote_file, methods=["POST"])
     router.add_api_route("/emotes/check_result/{task_id}", check_task_result, methods=["GET"])
