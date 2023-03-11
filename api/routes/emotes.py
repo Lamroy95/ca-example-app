@@ -1,11 +1,11 @@
 from uuid import UUID
 
-from fastapi import Depends, APIRouter, File
+from fastapi import Depends, APIRouter
 from fastapi.params import Path
 
 from api.dependencies.reader import local_reader_provider, remote_reader_provider, memory_reader_provider
 from api.dependencies.task_manager import task_manager_provider
-from api.models.bodies import UrlEmoteBody
+from api.models.bodies import UrlEmote, FileEmote
 from api.models.responses import TaskIdResponse, TaskResultResponse
 from emotes.interfaces.reader import EmoteReader
 from emotes.interfaces.task_manager import TaskManager
@@ -13,26 +13,26 @@ from emotes.services.convert import convert_webp_emote_from_path, convert_webp_e
 
 
 async def convert_webp_emote_url(
-        body: UrlEmoteBody,
+        emote: UrlEmote,
         task_manager: TaskManager = Depends(task_manager_provider),
         reader: EmoteReader = Depends(remote_reader_provider)
 ) -> TaskIdResponse:
     """
     Convert WEBP emote from url
     """
-    task = convert_webp_emote_from_path(body.emote_url, reader, task_manager)
+    task = convert_webp_emote_from_path(emote.url, reader, task_manager)
     return TaskIdResponse(task_id=task.id)
 
 
 async def convert_webp_emote_file(
-        emote_file: bytes = File(),
+        emote: FileEmote,
         task_manager: TaskManager = Depends(task_manager_provider),
         reader: EmoteReader = Depends(memory_reader_provider)
 ) -> TaskIdResponse:
     """
     Convert WEBP emote from file
     """
-    task = convert_webp_emote_from_file(emote_file, reader, task_manager)
+    task = convert_webp_emote_from_file(emote.file, reader, task_manager)
     return TaskIdResponse(task_id=task.id)
 
 

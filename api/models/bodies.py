@@ -1,5 +1,9 @@
 from pydantic import BaseModel
 
 
-class UrlEmoteBody(BaseModel):
-    emote_url: str
+class UrlEmote(BaseModel):
+    url: str
+
+
+class FileEmote(BaseModel):
+    file: bytes
